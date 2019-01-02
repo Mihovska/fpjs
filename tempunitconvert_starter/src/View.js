@@ -11,6 +11,15 @@ const {
   option
 } = hh(h);
 
+const UNITS = ['Fahrenheit', 'Celsius', 'Kelvin'];
+
+function unitOptions(selectedUnit) {
+  return R.map(
+    unit => option({ value: unit, selected: selectedUnit === unit}, unit),
+    UNITS
+  )
+}
+
 function leftUnitField(inputValue){
   return input({
       className: 'pa2 input-reset ba w-30 mb2',
@@ -63,7 +72,19 @@ function rightDropdown(selectedOption) {
 function view(dispatch, model) {
   return div({ className: 'mw6 center' }, [
     h1({ className: 'f2 pv2 bb' }, 'Temperature Unit Converter'),
-    div([leftUnitField(55), ' = ', rightUnitField(22)]),
+    // div([leftUnitField(55), ' = ', rightUnitField(22)]),
+    div({ className: 'flex' }, [
+      unitSection(
+        dispatch,
+        model.leftDropdown,
+        model.leftUnitInput
+      ),
+      unitSection(
+        dispatch,
+        model.rightDropdown,
+        model.rightUnitInput
+      )
+    ]),
     pre(JSON.stringify(model, null, 2)),
   ]);
 }
