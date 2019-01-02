@@ -6,9 +6,10 @@ import {
   mealInputMsg,
   caloriesInputMsg,
   saveMealMsg,
+  deleteMealMsg,
 } from './Update';
 
-const { pre, div, h1, button, form, label, input, tr, td, tbody, th, thead, table } = hh(h);
+const { pre, div, h1, button, form, label, input, tr, td, tbody, th, thead, table, i } = hh(h);
 
 function fieldSet(labelText, inputValue, oninput) {
   return div([
@@ -77,49 +78,52 @@ function cell(tag, className, value) {
   return tag({ className }, value );
 };
 
-function mealRow(className, meal) {
+function mealRow(dispatch, className, meal) {
   return tr({ className }, [
     cell(td, 'pa2', meal.description),
-    cell(td, 'pa2', meal.calories),
-    cell(td, 'pa2 tr', 'test')
+    cell(td, 'pa2 tr', meal.calories),
+    cell(td, 'pa2 tr', [
+      i({
+        className: 'ph1 fa fa-trash-o pointer',
+        onclick: () => dispatch(deleteMealMsg(meal.id))
+      })
+    ]),
   ]);
 };
 
-function mealsBody(className, meals) {
-  const rows = R.map(R.partial(mealRow, ['stripe-dark']), meals);
-  return tbody({ className }, rows);
+function mealsBody(dispatch, className, meals) {
+  const rows = R.map(R.partial(mealRow, [dispatch, 'stripe-dark']), meals);
+  const rowsWithTotal = [...rows, totalRow(meals)];
+  return tbody({ className }, rowsWithTotal);
 };
 
-function headerRow() {
-  return ([
+const tableHeader = thead([
+  tr([
     cell(th, 'pa2 tl', 'Meal'),
     cell(th, 'pa2 tr', 'Calories'),
-    cell(th, 'pa2 tr', '')
-  ])
-};
+    cell(th, '', '')
+  ]),
+]);
 
-function tableHeader() {
-  return thead(headerRow());
-};
-
-function totalRow(className, meals) {
+function totalRow(meals) {
   const takeCalories = function(mealsItem) {
     return mealsItem.calories;
   }
   const totalAmount = R.pipe(R.map(takeCalories), R.sum);
-  return tr({ className }, [
+  return tr({ className: 'bt b' }, [
     cell(td, 'pa2 tr', 'Total: '),
     cell(td, 'pa2 tr', totalAmount(meals)),
-    cell(td, 'pa2 tr', '')
+    cell(td, '', '')
   ]);
 };
 
-function tableView(className, model) {
-  const { meals } = model;
- return table({ className }, [
-   tableHeader(),
-   mealsBody('', meals),
-   totalRow('', meals)
+function tableView(dispatch, meals) {
+  if (meals.length === 0) {
+    return div({ className: 'mv2 i black-50' }, 'No meals to display');
+  }
+   return table({ className: 'mv2 w-100 collapse' }, [
+   tableHeader,
+   mealsBody(dispatch, '', meals)
  ])
 };
 
@@ -127,7 +131,7 @@ function view(dispatch, model) {
   return div({ className: 'mw6 center' }, [
     h1({ className: 'f2 pv2 bb' }, 'Calorie Counter'),
     formView(dispatch, model),
-    tableView('', model)
+    tableView(dispatch, model.meals)
   ]);
 }
 
