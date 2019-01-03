@@ -1,6 +1,12 @@
 import * as R from 'ramda';
 import hh from 'hyperscript-helpers';
 import { h } from 'virtual-dom';
+import { 
+  leftInputMsg,
+  rightInputMsg,
+  leftDropdownMsg,
+  rightDropdownMsg
+} from './Update';
 
 const {
   div,
@@ -20,54 +26,23 @@ function unitOptions(selectedUnit) {
   )
 }
 
-function leftUnitField(inputValue){
-  return input({
-      className: 'pa2 input-reset ba w-30 mb2',
-      type: 'text',
-      value: inputValue
-    });
-}
-
-function rightUnitField(inputValue) {
-  return input({
-    className: 'pa2 input-reset ba w-30 mb2',
-    type: 'text',
-    value: inputValue
-  });
-}
-
-function unitSection(dispatch, unit, value) {
+function unitSection(dispatch, unit, value, oninput, onchange) {
   return div({ className: 'w-50 ma1' }, [
     input({
       type: 'text',
       className: 'db w-100 mv2 pa2 input-reset ba',
-      value
+      value,
+      oninput
     }),
     select(
       {
-        className: 'db w-100 pa2 ba input-reset br1 bg-white ba b--black'
+        className: 'db w-100 pa2 ba input-reset br1 bg-white ba b--black',
+        onchange
       },
       unitOptions(unit)
     )
   ]);
 }
-
-function leftDropdown(selectedOption) {
-  return select([
-    option('Fahrenheit'),
-    option('Celsius'),
-    option('Kelvin')
-  ]);
-}
-
-function rightDropdown(selectedOption) {
-  return select([
-    option('Fahrenheit'),
-    option('Celsius'),
-    option('Kelvin')
-  ]);
-}
-
 
 function view(dispatch, model) {
   return div({ className: 'mw6 center' }, [
@@ -77,12 +52,16 @@ function view(dispatch, model) {
       unitSection(
         dispatch,
         model.leftDropdown,
-        model.leftUnitInput
+        model.leftUnitInput,
+        e => dispatch(leftInputMsg(e.target.value)),
+        e => dispatch(leftDropdownMsg(e.target.value))
       ),
       unitSection(
         dispatch,
         model.rightDropdown,
-        model.rightUnitInput
+        model.rightUnitInput,
+        e => dispatch(rightInputMsg(e.target.value)),
+        e => dispatch(rightDropdownMsg(e.target.value))
       )
     ]),
     pre(JSON.stringify(model, null, 2)),
