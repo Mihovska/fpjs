@@ -73,4 +73,30 @@ function update (msg, model) {
   return model;
 }
 
+function convert(model){
+  if (model.sourceLeft === true){
+    //Math.round,
+    //take chosen option
+  }
+}
+
+function celsiusToFahrenheit(celsius){
+  const fahrenheit = (celsius * (9/5)) + 32;
+  return fahrenheit;
+}
+
+function fahrenheitToCelsius(fahrenheit){
+  const celsius = 5/9 * (fahrenheit - 32);
+  return celsius;
+}
+
+function celsiusToKelvin(celsius){
+  return (celsius + 273.15);
+}
+
+function kelvinToCelsius(kelvin){
+  return (kelvin - 273.15);
+}
+console.log(fahrenheitToCelsius(30));
+console.log(celsiusToFahrenheit(30));
 export default update;
