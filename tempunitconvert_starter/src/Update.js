@@ -45,7 +45,7 @@ function update (msg, model) {
         parseInt,
         R.defaultTo(0)
       )(msg.leftUnitInput);
-      return { ...model, sourceLeft: true, leftUnitInput };
+      return convert({ ...model, sourceLeft: true, leftUnitInput });
       break;
     }
     case MSGS.RIGHT_INPUT: {
@@ -56,17 +56,17 @@ function update (msg, model) {
         parseInt,
         R.defaultTo(0)
       )(msg.rightUnitInput);
-      return { ...model, sourceLeft: false, rightUnitInput };
+      return convert({ ...model, sourceLeft: false, rightUnitInput });
       break;
     }
     case MSGS.LEFT_DROPDOWN: {
       const { leftDropdown } = msg;
-      return {...model, leftDropdown};
+      return convert({...model, leftDropdown});
       break;
     }
     case MSGS.RIGHT_DROPDOWN: {
       const { rightDropdown } = msg;
-      return {...model, rightDropdown};
+      return convert({...model, rightDropdown});
       break;
     }
   }
@@ -74,10 +74,28 @@ function update (msg, model) {
 }
 
 function convert(model){
-  if (model.sourceLeft === true){
-    //Math.round,
-    //take chosen option
-  }
+  const { leftUnitInput, rightUnitInput, leftDropdown, rightDropdown } = model;
+  
+  const [fromUnit, fromTemp, toUnit] = 
+    model.sourceLeft ? [leftDropdown, leftUnitInput, rightDropdown] : [rightDropdown, rightUnitInput, leftDropdown];
+
+  const otherValue = R.pipe(
+    convertFromTo,
+    Math.round,
+  )(fromUnit, toUnit, fromTemp);
+
+  return model.sourceLeft ? { ...model, rightUnitInput: otherValue } : { ...model, leftUnitInput: otherValue };
+}
+
+function convertFromTo(unitFrom, unitTo, temp) {
+  const convertUnit = R.pathOr(
+    R.identity,
+    [unitFrom, unitTo],
+    unitConvertion
+  );
+  
+  return convertUnit(temp);
+  
 }
 
 function celsiusToFahrenheit(celsius){
@@ -97,6 +115,23 @@ function celsiusToKelvin(celsius){
 function kelvinToCelsius(kelvin){
   return (kelvin - 273.15);
 }
-console.log(fahrenheitToCelsius(30));
-console.log(celsiusToFahrenheit(30));
+
+const kelvinToFahrenheit = R.pipe(kelvinToCelsius, celsiusToFahrenheit);
+const fahrenheitToKelvin = R.pipe(fahrenheitToCelsius, celsiusToKelvin);
+
+const unitConvertion = {
+  Celsius: {
+    Fahrenheit: celsiusToFahrenheit,
+    Kelvin: celsiusToKelvin
+  },
+  Fahrenheit: {
+    Celsius: fahrenheitToCelsius,
+    Kelvin: fahrenheitToKelvin
+  },
+  Kelvin: {
+    Celsius: kelvinToCelsius,
+    Fahrenheit: kelvinToFahrenheit
+  }
+};
+
 export default update;
