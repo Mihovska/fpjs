@@ -19,31 +19,15 @@ export function tipInputMsg(tipPercent){
   };
 }
 
-function percentage(num, percent){
-  return (num/100) * percent;
-}
-console.log(percentage(10, 15));
-
-function totalBill(amount, tipAmount){
-  return amount + tipAmount;
-}
-console.log(totalBill(10.00, 1.5));
-
-function numParse(num){
-  return num * 1;
-}
-
 function update (msg, model) {
   switch (msg.type) {
     case MSGS.AMOUNT_INPUT: {
-      const billAmount = R.pipe(
-        numParse
-      )(msg.billAmount);
+      const { billAmount } = msg.billAmount;
       return { ...model, billAmount };
       break;
     }
     case MSGS.TIP_INPUT: {
-      const { tipPercent } = msg;
+      const { tipPercent } = msg.tipPercent;
       return { ...model, tipPercent };
       break;
     }

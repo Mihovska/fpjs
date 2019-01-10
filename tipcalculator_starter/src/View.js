@@ -2,7 +2,8 @@ import * as R from 'ramda';
 import hh from 'hyperscript-helpers';
 import { h } from 'virtual-dom';
 import { 
-  amountInputMsg
+  amountInputMsg,
+  tipInputMsg
 } from './Update';
 
 const {
@@ -13,12 +14,8 @@ const {
   input,
   form,
   tr,
-  td
+  h3
 } = hh(h);
-
-function cell(tag, className, value) {
-  return tag({ className }, value);
-}
 
 function fields(labelText, inputValue, oninput) {
   return div([
@@ -32,31 +29,41 @@ function fields(labelText, inputValue, oninput) {
   ]);
 }
 
-function formView(dispatch, model) {
-  const { billAmount, tipPercent } = model;
-
-  return form(
-    {
-      className: 'w-100 mv2'
-    },
-    [
-      fields('Bill Amount', billAmount,
-      e => dispatch(amountInputMsg(e.target.value))
-      ),
-      fields('Tip %', tipPercent)
-    ]
-  )
+function calculatedAmount(text, amount){
+  return div([
+    h3(text),
+    h3(amount)
+  ]);
 }
 
-function totalRow(billAmount, tipPercent) {
-  const total = billAmount + tipPercent;
-  return tr()
+function calculatedTotal(tip, total){
+  return div([
+    calculatedAmount('Tip: $', tip),
+    calculatedAmount('Total bill: $', total)
+  ]);
 }
+
+function totalBill(amount, tipPercent){
+  const tip = parseFloat(amount) * parseFloat(tipPercent) / 100 || 0;  
+  return [tip,  tip + amount];
+}
+console.log(totalBill(10, 15));
 
 function view(dispatch, model) {
+  const { billAmount, tipPercent } = model;
+
+  const [tip, total] = totalBill(billAmount, tipPercent);
+
   return div({ className: 'mw6 center' }, [
     h1({ className: 'f2 pv2 bb' }, 'Tip Calculator'),
-    formView(dispatch, model),
+    fields('Bill Amount', billAmount,
+      e => dispatch(amountInputMsg(e.target.value))
+      ),
+      fields('Tip %', tipPercent,
+      e => dispatch(tipInputMsg(e.target.value))
+      ),
+      calculatedTotal(tip, total),
+    // formView(dispatch, model),
     pre(JSON.stringify(model, null, 2)),
   ]);
 }
