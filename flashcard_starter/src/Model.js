@@ -1,5 +1,9 @@
 const initModel = {
-    addButton: null,
+    cardId: null,
+    showAnswer: false,
+    edit: false,
+    answerRank: ''
+
 };
 
 export default initModel;
